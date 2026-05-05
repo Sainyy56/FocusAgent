@@ -632,22 +632,11 @@
     </div>
     <div class="header-right">
       <div class="date-badge" id="dateBadge">—</div>
-      <button class="api-key-btn" onclick="openModal()">⚙ API Key</button>
+      <div class="card-badge badge-green" style="padding:6px 12px;border-radius:6px;">✦ AI Ready</div>
     </div>
   </header>
 
-  <!-- API Key Modal -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-      <h3>🔑 Anthropic API Key</h3>
-      <p>FocusAgent uses Claude AI to generate your daily briefings, smart nudges, and end-of-day reviews. Your key is stored locally in your browser only.</p>
-      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
-      <div class="modal-actions">
-        <button class="btn-primary" onclick="saveKey()">Save Key</button>
-        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-      </div>
-    </div>
-  </div>
+
 
   <!-- Main Grid -->
   <div class="grid">
@@ -704,11 +693,6 @@
       </div>
       <div class="briefing-box" id="briefingBox" style="position:relative;">
         <div style="color:var(--muted);font-size:13px;">Click "Generate Briefing" to get your AI-powered morning summary based on your tasks.</div>
-        <div class="no-api-overlay" id="briefingOverlay">
-          <div class="key-icon">🔑</div>
-          <div>Add your Anthropic API key to enable AI features</div>
-          <a onclick="openModal()">Set API Key →</a>
-        </div>
       </div>
       <div class="briefing-actions">
         <button class="action-btn" onclick="generateBriefing()" id="briefingBtn">☀ Morning Briefing</button>
@@ -781,7 +765,6 @@
 <script>
 // ── State ──────────────────────────────────────────────────────────
 let tasks = JSON.parse(localStorage.getItem('fa_tasks') || '[]');
-let apiKey = localStorage.getItem('fa_apikey') || '';
 let sessions = parseInt(localStorage.getItem('fa_sessions') || '0');
 let timerInterval = null;
 let timerRunning = false;
@@ -797,7 +780,6 @@ window.onload = () => {
   updateFocusSelect();
   updateScore();
   document.getElementById('sessionCount').textContent = sessions;
-  if (!apiKey) showOverlays(); else hideOverlays();
 };
 
 function updateDate() {
@@ -806,19 +788,22 @@ function updateDate() {
   document.getElementById('dateBadge').textContent = d.toLocaleDateString('en-US', opts);
 }
 
-// ── API Key ────────────────────────────────────────────────────────
-function openModal() { document.getElementById('modalOverlay').classList.add('open'); document.getElementById('apiKeyInput').value = apiKey; }
-function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-function saveKey() {
-  const k = document.getElementById('apiKeyInput').value.trim();
-  if (!k) return;
-  apiKey = k;
-  localStorage.setItem('fa_apikey', k);
-  closeModal();
-  hideOverlays();
+// ── AI Calls (no API key needed — uses built-in proxy) ──────────────
+async function callClaude(systemPrompt, userMsg) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content[0].text;
 }
-function showOverlays() { document.getElementById('briefingOverlay').style.display = 'flex'; }
-function hideOverlays() { document.getElementById('briefingOverlay').style.display = 'none'; }
 
 // ── Tasks ──────────────────────────────────────────────────────────
 function saveTasks() { localStorage.setItem('fa_tasks', JSON.stringify(tasks)); }
@@ -898,24 +883,6 @@ function updateScore() {
   else { title = '✅ All done!'; sub = 'You crushed it today. Amazing discipline!'; }
   document.getElementById('scoreTitle').textContent = title;
   document.getElementById('scoreSub').textContent = sub;
-}
-
-// ── AI Calls ────────────────────────────────────────────────────────
-async function callClaude(systemPrompt, userMsg) {
-  if (!apiKey) { openModal(); throw new Error('No API key'); }
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userMsg }]
-    })
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.content[0].text;
 }
 
 function taskSummary() {
