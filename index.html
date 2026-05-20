@@ -31,7 +31,6 @@
     overflow-x: hidden;
   }
 
-  /* Animated background grid */
   body::before {
     content: '';
     position: fixed;
@@ -52,7 +51,6 @@
     padding: 32px 24px;
   }
 
-  /* Header */
   .header {
     display: flex;
     align-items: center;
@@ -115,7 +113,6 @@
   }
   .api-key-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* API Key Modal */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -183,7 +180,6 @@
     cursor: pointer;
   }
 
-  /* Grid layout */
   .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -231,7 +227,6 @@
   .badge-green { background: rgba(64,240,160,0.15); color: var(--green); }
   .badge-red { background: rgba(240,64,96,0.15); color: var(--red); }
 
-  /* Task Input */
   .task-input-row {
     display: flex;
     gap: 8px;
@@ -280,7 +275,6 @@
   }
   .add-btn:hover { background: #ffe800; }
 
-  /* Task list */
   .task-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
   .task-list::-webkit-scrollbar { width: 4px; }
   .task-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -343,7 +337,6 @@
   }
   .task-del:hover { color: var(--red); }
 
-  /* AI Briefing Panel */
   .briefing-box {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -401,7 +394,6 @@
   .action-btn:hover { border-color: var(--accent); color: var(--accent); }
   .action-btn.loading { opacity: 0.5; pointer-events: none; }
 
-  /* Stats strip */
   .stats-strip {
     display: flex;
     gap: 12px;
@@ -431,7 +423,7 @@
     font-weight: 500;
   }
 
-  /* Procrastination Score */
+
   .score-display {
     display: flex;
     align-items: center;
@@ -473,7 +465,7 @@
     line-height: 1.5;
   }
 
-  /* Nudge ticker */
+
   .nudge-list { display: flex; flex-direction: column; gap: 8px; }
 
   .nudge-item {
@@ -491,7 +483,7 @@
 
   .nudge-icon { font-size: 16px; flex-shrink: 0; }
 
-  /* Timer */
+
   .timer-display {
     text-align: center;
     padding: 16px 0;
@@ -536,10 +528,9 @@
   .timer-btn:hover { border-color: var(--accent); color: var(--accent); }
   .timer-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-  /* End of day */
   .eod-section { }
 
-  /* Chat input */
+
   .chat-row {
     display: flex;
     gap: 8px;
@@ -575,7 +566,7 @@
   }
   .send-btn:hover { background: #60f0ff; }
 
-  /* No API key overlay */
+
   .no-api-overlay {
     position: absolute;
     inset: 0;
@@ -599,7 +590,7 @@
     text-decoration: underline;
   }
 
-  /* Animations */
+
   @keyframes slideDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:none; } }
   @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
   @keyframes slideIn { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:none; } }
@@ -611,7 +602,7 @@
   .card:nth-child(4) { animation-delay: 0.2s; }
   .card:nth-child(5) { animation-delay: 0.25s; }
 
-  /* Responsive */
+
   @media (max-width: 768px) {
     .grid { grid-template-columns: 1fr; }
     .card-wide { grid-column: span 1; }
@@ -624,7 +615,6 @@
 <body>
 <div class="app">
 
-  <!-- Header -->
   <header class="header">
     <div class="logo">
       <div class="logo-mark">F</div>
@@ -638,10 +628,9 @@
 
 
 
-  <!-- Main Grid -->
+
   <div class="grid">
 
-    <!-- Task Manager -->
     <div class="card card-wide" style="animation-delay:0.05s">
       <div class="card-header">
         <div class="card-title">Today's Tasks</div>
@@ -685,7 +674,6 @@
       </div>
     </div>
 
-    <!-- AI Daily Briefing -->
     <div class="card" style="animation-delay:0.1s">
       <div class="card-header">
         <div class="card-title">AI Daily Briefing</div>
@@ -704,7 +692,6 @@
       </div>
     </div>
 
-    <!-- Procrastination Score + Nudges -->
     <div class="card" style="animation-delay:0.15s">
       <div class="card-header">
         <div class="card-title">Focus Score</div>
@@ -729,7 +716,6 @@
       </div>
     </div>
 
-    <!-- Pomodoro Timer -->
     <div class="card card-wide" style="animation-delay:0.2s">
       <div class="card-header">
         <div class="card-title">Focus Timer</div>
@@ -759,11 +745,11 @@
       </div>
     </div>
 
-  </div><!-- /grid -->
-</div><!-- /app -->
+  </div>
+</div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────
+
 let tasks = JSON.parse(localStorage.getItem('fa_tasks') || '[]');
 let sessions = parseInt(localStorage.getItem('fa_sessions') || '0');
 let timerInterval = null;
@@ -772,7 +758,7 @@ let timerSeconds = 25 * 60;
 let timerMode = 'pomodoro';
 const MODES = { pomodoro: 25*60, short: 5*60, long: 15*60 };
 
-// ── Init ──────────────────────────────────────────────────────────
+
 window.onload = () => {
   updateDate();
   renderTasks();
@@ -788,7 +774,7 @@ function updateDate() {
   document.getElementById('dateBadge').textContent = d.toLocaleDateString('en-US', opts);
 }
 
-// ── AI Calls (no API key needed — uses built-in proxy) ──────────────
+
 async function callClaude(systemPrompt, userMsg) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -805,7 +791,7 @@ async function callClaude(systemPrompt, userMsg) {
   return data.content[0].text;
 }
 
-// ── Tasks ──────────────────────────────────────────────────────────
+
 function saveTasks() { localStorage.setItem('fa_tasks', JSON.stringify(tasks)); }
 
 function addTask() {
@@ -994,7 +980,7 @@ function showThinking(box) {
   box.innerHTML = `<div class="ai-thinking"><div class="dot-pulse"><span></span><span></span><span></span></div> Claude is thinking...</div>`;
 }
 
-// ── Timer ──────────────────────────────────────────────────────────
+
 function setMode(mode) {
   timerMode = mode;
   timerSeconds = MODES[mode];
@@ -1026,7 +1012,7 @@ function toggleTimer() {
           localStorage.setItem('fa_sessions', sessions);
           document.getElementById('sessionCount').textContent = sessions;
         }
-        // Browser notification
+        
         if (Notification.permission === 'granted') {
           new Notification('FocusAgent', { body: timerMode === 'pomodoro' ? '🎉 Focus session complete! Take a break.' : '⚡ Break over — back to work!', icon: '' });
         }
@@ -1051,10 +1037,8 @@ function updateTimerDisplay() {
   document.getElementById('timerDisplay').textContent = `${m}:${s}`;
 }
 
-// Request notification permission on load
 if (Notification.permission === 'default') Notification.requestPermission();
 
-// ── Helpers ─────────────────────────────────────────────────────────
 function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
