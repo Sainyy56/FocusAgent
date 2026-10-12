@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FocusAgent — Your AI Productivity Co-pilot</title>
+<title>FocusAgent: Your AI Productivity Co-pilot</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -636,7 +636,7 @@
         <div class="card-title">Today's Tasks</div>
         <div style="display:flex;gap:8px;align-items:center">
           <div class="card-badge badge-yellow" id="taskCountBadge">0 pending</div>
-          <button class="action-btn" onclick="prioritizeTasks()" id="priBtn">✦ AI Prioritize</button>
+          <button class="action-btn" onclick="prioritizeTasks()" id="priBtn">AI Prioritize</button>
         </div>
       </div>
 
@@ -670,14 +670,14 @@
       </div>
 
       <div class="task-list" id="taskList">
-        <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0;">No tasks yet — add something to get started!</div>
+        <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0;">No tasks yet, add something to get started!</div>
       </div>
     </div>
 
     <div class="card" style="animation-delay:0.1s">
       <div class="card-header">
         <div class="card-title">AI Daily Briefing</div>
-        <div class="card-badge badge-cyan">CLAUDE</div>
+        <div class="card-badge badge-cyan">GEMINI</div>
       </div>
       <div class="briefing-box" id="briefingBox" style="position:relative;">
         <div style="color:var(--muted);font-size:13px;">Click "Generate Briefing" to get your AI-powered morning summary based on your tasks.</div>
@@ -750,7 +750,8 @@
 
 <script>
 
-let tasks = JSON.parse(localStorage.getItem('fa_tasks') || '[]');
+const API_BASE = 'http://localhost:3210';
+let tasks = [];
 let sessions = parseInt(localStorage.getItem('fa_sessions') || '0');
 let timerInterval = null;
 let timerRunning = false;
@@ -759,14 +760,23 @@ let timerMode = 'pomodoro';
 const MODES = { pomodoro: 25*60, short: 5*60, long: 15*60 };
 
 
-window.onload = () => {
+window.onload = async () => {
   updateDate();
-  renderTasks();
-  updateStats();
+  await loadTasks();
   updateFocusSelect();
-  updateScore();
   document.getElementById('sessionCount').textContent = sessions;
 };
+
+async function loadTasks() {
+  try {
+    const res = await fetch(`${API_BASE}/api/tasks`);
+    tasks = await res.json();
+  } catch (e) {
+    console.error('Could not reach local FocusAgent server. Is `node server.js` running?', e);
+    tasks = [];
+  }
+  renderTasks(); updateStats(); updateScore();
+}
 
 function updateDate() {
   const d = new Date();
@@ -776,23 +786,28 @@ function updateDate() {
 
 
 async function callClaude(systemPrompt, userMsg) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${API_BASE}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userMsg }]
-    })
+    body: JSON.stringify({ system: systemPrompt, message: userMsg })
   });
   const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.content[0].text;
+  if (data.error) throw new Error(data.error);
+  return data.text;
 }
 
 
-function saveTasks() { localStorage.setItem('fa_tasks', JSON.stringify(tasks)); }
+async function saveTasks() {
+  try {
+    await fetch(`${API_BASE}/api/tasks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tasks)
+    });
+  } catch (e) {
+    console.error('Could not save tasks to local server:', e);
+  }
+}
 
 function addTask() {
   const input = document.getElementById('taskInput');
@@ -977,7 +992,7 @@ async function sendChat() {
 }
 
 function showThinking(box) {
-  box.innerHTML = `<div class="ai-thinking"><div class="dot-pulse"><span></span><span></span><span></span></div> Claude is thinking...</div>`;
+  box.innerHTML = `<div class="ai-thinking"><div class="dot-pulse"><span></span><span></span><span></span></div> Thinking...</div>`;
 }
 
 

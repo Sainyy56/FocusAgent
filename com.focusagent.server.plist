@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.focusagent.server</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>/Users/sainyverma/Documents/projects/FocusAgent/server.js</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/sainyverma/Documents/projects/FocusAgent</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/focusagent.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/focusagent.error.log</string>
+</dict>
+</plist>
